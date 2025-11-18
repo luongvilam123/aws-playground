@@ -1,94 +1,30 @@
 service: myDummyProject
+
 plugins:
   - serverless-step-functions
-  - serverless-pseudo-parameters
 
 provider:
   name: aws
-  runtime: python3.12
+  runtime: nodejs18.x
+  region: us-east-1
 
 functions:
-  myTestFunction:
-    handler: handler.myTestFunction
+  dummyFunction:
+    handler: handler.run
 
 stepFunctions:
+  validate: true
   stateMachines:
-    testStepFunction:
-      events:
-        - http:
-            path: gofunction
-            method: GET
-        - schedule:
-            rate: rate(10 minutes)
-            enabled: true
-            input:
-              key1: value1
-              key2: value2
-              stageParams:
-                stage: dev
-      name: myStateMachine
+    dummyWorkflow:
       definition:
-        Comment: "A Hello World example of the Amazon States Language using an AWS Lambda Function"
-        StartAt: HelloWorld1
+        Comment: Dummy workflow that calls a Lambda and then succeeds
+        StartAt: InvokeLambda
         States:
-          HelloWorld1:
+          InvokeLambda:
             Type: Task
             Resource:
-              Fn::GetAtt: [hello, Arn]
+              Fn::GetAtt:
+                - dummyFunction
+                - Arn
+            ResultPath: $.lambdaResult
             End: true
-      dependsOn: CustomIamRole
-      tags:
-        Team: LamLuong
-      alarms:
-        topics:
-          ok: arn:aws:sns:us-east-1:1234567890:NotifyMe
-          alarm: arn:aws:sns:us-east-1:1234567890:NotifyMe
-          insufficientData: arn:aws:sns:us-east-1:1234567890:NotifyMe
-        metrics:
-          - executionsTimedOut
-          - executionsFailed
-          - executionsAborted
-          - metric: executionThrottled
-            treatMissingData: breaching # overrides below default
-          - executionsSucceeded
-        treatMissingData: ignore # optional
-    hellostepfunc2:
-      definition:
-        StartAt: HelloWorld2
-        States:
-          HelloWorld2:
-            Type: Task
-            Resource:
-              Fn::GetAtt: [hello, Arn]
-            End: true
-    ddbtablestepfunc:
-      definition:
-        Comment: Demonstrates how to reference a DynamoDB Table Name exported from an external CloudFormation Stack
-        StartAt: ImportDDBTableName
-        States:
-          ImportDDBTableName:
-            Type: Task
-            Resource: "arn:aws:states:::dynamodb:updateItem"
-            Parameters:
-              TableName:
-                Fn::ImportValue: MyExternalStack:ToDoTable:Name # imports a table name from an external stack
-              Key:
-                id:
-                  S.$: "$.todoId"
-              UpdateExpression: "SET #status = :updatedStatus"
-              ExpressionAttributeNames:
-                "#status": status
-              ExpressionAttributeValues:
-                ":updatedStatus":
-                  S: DONE
-            End: true
-      dependsOn:
-        - DynamoDBTable
-        - KinesisStream
-        - CustomIamRole
-      tags:
-        Team: Atlantis
-  activities:
-    - myTask
-    - yourTask
-  validate: true # enable pre-deployment definition validation (disabled by default)

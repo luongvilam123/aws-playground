@@ -2,10 +2,10 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "The AWS CloudFormation template for this Serverless application",
   "Resources": {
-    "MyTestFunctionLogGroup": {
+    "DummyFunctionLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/myDummyProject-dev-myTestFunction"
+        "LogGroupName": "/aws/lambda/myDummyProject-dev-dummyFunction"
       }
     },
     "IamRoleLambdaExecution": {
@@ -86,16 +86,16 @@
         }
       }
     },
-    "MyTestFunctionLambdaFunction": {
+    "DummyFunctionLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-e50dbcdd-e8ba",
-          "S3Key": "serverless/myDummyProject/dev/1763434535298-2025-11-18T02:55:35.298Z/myDummyProject.zip"
+          "S3Key": "serverless/myDummyProject/dev/1763435328690-2025-11-18T03:08:48.690Z/myDummyProject.zip"
         },
-        "Handler": "handler.myTestFunction",
-        "Runtime": "python3.12",
-        "FunctionName": "myDummyProject-dev-myTestFunction",
+        "Handler": "handler.run",
+        "Runtime": "nodejs18.x",
+        "FunctionName": "myDummyProject-dev-dummyFunction",
         "MemorySize": 1024,
         "Timeout": 6,
         "Role": {
@@ -106,20 +106,20 @@
         }
       },
       "DependsOn": [
-        "MyTestFunctionLogGroup"
+        "DummyFunctionLogGroup"
       ]
     },
-    "MyTestFunctionLambdaVersionwhf0isdNfUr0yAGfiRJ0SbPVJm6zBRSBm3qZRQ2KlZQ": {
+    "DummyFunctionLambdaVersionFrp1kMX3Pz5T1SHFhjrZwxlRTtFvFlrl6XgpI41ogXI": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
-          "Ref": "MyTestFunctionLambdaFunction"
+          "Ref": "DummyFunctionLambdaFunction"
         },
-        "CodeSha256": "l51RiBB0rTilONjan+MaU8LepSXkl+WwgweSJT1y72E="
+        "CodeSha256": "dU+4kWSzR7cGf2ifM7UZ4YRoagfYhj2dfA3OqXUqjq4="
       }
     },
-    "MyStateMachineRole": {
+    "DummyWorkflowStepFunctionsStateMachineRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -150,7 +150,7 @@
                   "Resource": [
                     {
                       "Fn::GetAtt": [
-                        "hello",
+                        "DummyFunctionLambdaFunction",
                         "Arn"
                       ]
                     },
@@ -160,7 +160,7 @@
                         {
                           "functionArn": {
                             "Fn::GetAtt": [
-                              "hello",
+                              "DummyFunctionLambdaFunction",
                               "Arn"
                             ]
                           }
@@ -175,138 +175,16 @@
         ]
       }
     },
-    "Hellostepfunc2StepFunctionsStateMachineRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": {
-                  "Fn::Sub": "states.${AWS::Region}.amazonaws.com"
-                }
-              },
-              "Action": "sts:AssumeRole"
-            }
-          ]
-        },
-        "Policies": [
-          {
-            "PolicyName": "dev-myDummyProject-statemachine",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "lambda:InvokeFunction"
-                  ],
-                  "Resource": [
-                    {
-                      "Fn::GetAtt": [
-                        "hello",
-                        "Arn"
-                      ]
-                    },
-                    {
-                      "Fn::Sub": [
-                        "${functionArn}:*",
-                        {
-                          "functionArn": {
-                            "Fn::GetAtt": [
-                              "hello",
-                              "Arn"
-                            ]
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "DdbtablestepfuncStepFunctionsStateMachineRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": {
-                  "Fn::Sub": "states.${AWS::Region}.amazonaws.com"
-                }
-              },
-              "Action": "sts:AssumeRole"
-            }
-          ]
-        },
-        "Policies": [
-          {
-            "PolicyName": "dev-myDummyProject-statemachine",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "dynamodb:UpdateItem"
-                  ],
-                  "Resource": [
-                    {
-                      "Fn::Join": [
-                        ":",
-                        [
-                          "arn",
-                          {
-                            "Ref": "AWS::Partition"
-                          },
-                          "dynamodb",
-                          {
-                            "Ref": "AWS::Region"
-                          },
-                          {
-                            "Ref": "AWS::AccountId"
-                          },
-                          {
-                            "Fn::Join": [
-                              "/",
-                              [
-                                "table",
-                                {
-                                  "Fn::ImportValue": "MyExternalStack:ToDoTable:Name"
-                                }
-                              ]
-                            ]
-                          }
-                        ]
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "MyStateMachine": {
+    "DummyWorkflowStepFunctionsStateMachine": {
       "Type": "AWS::StepFunctions::StateMachine",
       "Properties": {
         "DefinitionString": {
           "Fn::Sub": [
-            "{\n  \"Comment\": \"A Hello World example of the Amazon States Language using an AWS Lambda Function\",\n  \"StartAt\": \"HelloWorld1\",\n  \"States\": {\n    \"HelloWorld1\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${d9c520373cb4d5c2b85bd6ec0e3422d7}\",\n      \"End\": true\n    }\n  }\n}",
+            "{\n  \"Comment\": \"Dummy workflow that calls a Lambda and then succeeds\",\n  \"StartAt\": \"InvokeLambda\",\n  \"States\": {\n    \"InvokeLambda\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${fe7bf117083b99c04f572f6cab6fe416}\",\n      \"ResultPath\": \"$.lambdaResult\",\n      \"End\": true\n    }\n  }\n}",
             {
-              "d9c520373cb4d5c2b85bd6ec0e3422d7": {
+              "fe7bf117083b99c04f572f6cab6fe416": {
                 "Fn::GetAtt": [
-                  "hello",
+                  "DummyFunctionLambdaFunction",
                   "Arn"
                 ]
               }
@@ -315,468 +193,13 @@
         },
         "RoleArn": {
           "Fn::GetAtt": [
-            "MyStateMachineRole",
-            "Arn"
-          ]
-        },
-        "Tags": [
-          {
-            "Key": "Team",
-            "Value": "LamLuong"
-          }
-        ],
-        "StateMachineName": "myStateMachine"
-      },
-      "DependsOn": [
-        "MyStateMachineRole",
-        "CustomIamRole"
-      ]
-    },
-    "Hellostepfunc2StepFunctionsStateMachine": {
-      "Type": "AWS::StepFunctions::StateMachine",
-      "Properties": {
-        "DefinitionString": {
-          "Fn::Sub": [
-            "{\n  \"StartAt\": \"HelloWorld2\",\n  \"States\": {\n    \"HelloWorld2\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${d9c520373cb4d5c2b85bd6ec0e3422d7}\",\n      \"End\": true\n    }\n  }\n}",
-            {
-              "d9c520373cb4d5c2b85bd6ec0e3422d7": {
-                "Fn::GetAtt": [
-                  "hello",
-                  "Arn"
-                ]
-              }
-            }
-          ]
-        },
-        "RoleArn": {
-          "Fn::GetAtt": [
-            "Hellostepfunc2StepFunctionsStateMachineRole",
+            "DummyWorkflowStepFunctionsStateMachineRole",
             "Arn"
           ]
         }
       },
       "DependsOn": [
-        "Hellostepfunc2StepFunctionsStateMachineRole"
-      ]
-    },
-    "DdbtablestepfuncStepFunctionsStateMachine": {
-      "Type": "AWS::StepFunctions::StateMachine",
-      "Properties": {
-        "DefinitionString": {
-          "Fn::Sub": [
-            "{\n  \"Comment\": \"Demonstrates how to reference a DynamoDB Table Name exported from an external CloudFormation Stack\",\n  \"StartAt\": \"ImportDDBTableName\",\n  \"States\": {\n    \"ImportDDBTableName\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"arn:aws:states:::dynamodb:updateItem\",\n      \"Parameters\": {\n        \"TableName\": \"${40f440eae28bd82cdfea658066f2801b}\",\n        \"Key\": {\n          \"id\": {\n            \"S.$\": \"$.todoId\"\n          }\n        },\n        \"UpdateExpression\": \"SET #status = :updatedStatus\",\n        \"ExpressionAttributeNames\": {\n          \"#status\": \"status\"\n        },\n        \"ExpressionAttributeValues\": {\n          \":updatedStatus\": {\n            \"S\": \"DONE\"\n          }\n        }\n      },\n      \"End\": true\n    }\n  }\n}",
-            {
-              "40f440eae28bd82cdfea658066f2801b": {
-                "Fn::ImportValue": "MyExternalStack:ToDoTable:Name"
-              }
-            }
-          ]
-        },
-        "RoleArn": {
-          "Fn::GetAtt": [
-            "DdbtablestepfuncStepFunctionsStateMachineRole",
-            "Arn"
-          ]
-        },
-        "Tags": [
-          {
-            "Key": "Team",
-            "Value": "Atlantis"
-          }
-        ]
-      },
-      "DependsOn": [
-        "DdbtablestepfuncStepFunctionsStateMachineRole",
-        "DynamoDBTable",
-        "KinesisStream",
-        "CustomIamRole"
-      ]
-    },
-    "MyTaskStepFunctionsActivity": {
-      "Type": "AWS::StepFunctions::Activity",
-      "Properties": {
-        "Name": "myTask"
-      }
-    },
-    "YourTaskStepFunctionsActivity": {
-      "Type": "AWS::StepFunctions::Activity",
-      "Properties": {
-        "Name": "yourTask"
-      }
-    },
-    "MyStateMachineExecutionsTimedOutAlarm": {
-      "Type": "AWS::CloudWatch::Alarm",
-      "Properties": {
-        "Namespace": "AWS/States",
-        "MetricName": "ExecutionsTimedOut",
-        "AlarmDescription": "myStateMachine[dev][us-east-1]: executions timed out",
-        "Threshold": 1,
-        "Period": 60,
-        "EvaluationPeriods": 1,
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Statistic": "Sum",
-        "OKActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "AlarmActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "InsufficientDataActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "TreatMissingData": "ignore",
-        "Dimensions": [
-          {
-            "Name": "StateMachineArn",
-            "Value": {
-              "Ref": "MyStateMachine"
-            }
-          }
-        ]
-      }
-    },
-    "MyStateMachineExecutionsFailedAlarm": {
-      "Type": "AWS::CloudWatch::Alarm",
-      "Properties": {
-        "Namespace": "AWS/States",
-        "MetricName": "ExecutionsFailed",
-        "AlarmDescription": "myStateMachine[dev][us-east-1]: executions failed",
-        "Threshold": 1,
-        "Period": 60,
-        "EvaluationPeriods": 1,
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Statistic": "Sum",
-        "OKActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "AlarmActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "InsufficientDataActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "TreatMissingData": "ignore",
-        "Dimensions": [
-          {
-            "Name": "StateMachineArn",
-            "Value": {
-              "Ref": "MyStateMachine"
-            }
-          }
-        ]
-      }
-    },
-    "MyStateMachineExecutionsAbortedAlarm": {
-      "Type": "AWS::CloudWatch::Alarm",
-      "Properties": {
-        "Namespace": "AWS/States",
-        "MetricName": "ExecutionsAborted",
-        "AlarmDescription": "myStateMachine[dev][us-east-1]: executions were aborted",
-        "Threshold": 1,
-        "Period": 60,
-        "EvaluationPeriods": 1,
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Statistic": "Sum",
-        "OKActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "AlarmActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "InsufficientDataActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "TreatMissingData": "ignore",
-        "Dimensions": [
-          {
-            "Name": "StateMachineArn",
-            "Value": {
-              "Ref": "MyStateMachine"
-            }
-          }
-        ]
-      }
-    },
-    "MyStateMachineExecutionThrottledAlarm": {
-      "Type": "AWS::CloudWatch::Alarm",
-      "Properties": {
-        "Namespace": "AWS/States",
-        "MetricName": "ExecutionThrottled",
-        "AlarmDescription": "myStateMachine[dev][us-east-1]: execution were throttled",
-        "Threshold": 1,
-        "Period": 60,
-        "EvaluationPeriods": 1,
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Statistic": "Sum",
-        "OKActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "AlarmActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "InsufficientDataActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "TreatMissingData": "breaching",
-        "Dimensions": [
-          {
-            "Name": "StateMachineArn",
-            "Value": {
-              "Ref": "MyStateMachine"
-            }
-          }
-        ]
-      }
-    },
-    "MyStateMachineExecutionsSucceededAlarm": {
-      "Type": "AWS::CloudWatch::Alarm",
-      "Properties": {
-        "Namespace": "AWS/States",
-        "MetricName": "ExecutionsSucceeded",
-        "AlarmDescription": "myStateMachine[dev][us-east-1]: executions succeeded",
-        "Threshold": 1,
-        "Period": 60,
-        "EvaluationPeriods": 1,
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Statistic": "Sum",
-        "OKActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "AlarmActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "InsufficientDataActions": [
-          "arn:aws:sns:us-east-1:1234567890:NotifyMe"
-        ],
-        "TreatMissingData": "ignore",
-        "Dimensions": [
-          {
-            "Name": "StateMachineArn",
-            "Value": {
-              "Ref": "MyStateMachine"
-            }
-          }
-        ]
-      }
-    },
-    "TestStepFunctionStepFunctionsEventsRuleSchedule1": {
-      "Type": "AWS::Events::Rule",
-      "Properties": {
-        "ScheduleExpression": "rate(10 minutes)",
-        "State": "ENABLED",
-        "Targets": [
-          {
-            "Input": "{\"key1\":\"value1\",\"key2\":\"value2\",\"stageParams\":{\"stage\":\"dev\"}}",
-            "Arn": {
-              "Ref": "MyStateMachine"
-            },
-            "Id": "testStepFunctionStepFunctionsSchedule",
-            "RoleArn": {
-              "Fn::GetAtt": [
-                "TestStepFunctionScheduleToStepFunctionsRole",
-                "Arn"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "TestStepFunctionScheduleToStepFunctionsRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "events.amazonaws.com"
-              },
-              "Action": "sts:AssumeRole"
-            }
-          ]
-        },
-        "Policies": [
-          {
-            "PolicyName": "dev-us-east-1-myDummyProject-testStepFunction-schedule",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "states:StartExecution"
-                  ],
-                  "Resource": {
-                    "Ref": "MyStateMachine"
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "ApiGatewayRestApi": {
-      "Type": "AWS::ApiGateway::RestApi",
-      "Properties": {
-        "Name": "dev-myDummyProject",
-        "EndpointConfiguration": {
-          "Types": [
-            "EDGE"
-          ]
-        }
-      }
-    },
-    "ApiGatewayResourceGofunction": {
-      "Type": "AWS::ApiGateway::Resource",
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "ApiGatewayRestApi",
-            "RootResourceId"
-          ]
-        },
-        "PathPart": "gofunction",
-        "RestApiId": {
-          "Ref": "ApiGatewayRestApi"
-        }
-      }
-    },
-    "ApiGatewayMethodGofunctionGet": {
-      "Type": "AWS::ApiGateway::Method",
-      "Properties": {
-        "HttpMethod": "GET",
-        "RequestParameters": {},
-        "AuthorizationType": "NONE",
-        "ApiKeyRequired": false,
-        "ResourceId": {
-          "Ref": "ApiGatewayResourceGofunction"
-        },
-        "RestApiId": {
-          "Ref": "ApiGatewayRestApi"
-        },
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS",
-          "Credentials": {
-            "Fn::GetAtt": [
-              "ApigatewayToStepFunctionsRole",
-              "Arn"
-            ]
-          },
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition"
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region"
-                },
-                ":states:action/StartExecution"
-              ]
-            ]
-          },
-          "PassthroughBehavior": "NEVER",
-          "RequestTemplates": {
-            "application/json": {
-              "Fn::Sub": [
-                "\n#set( $body = $util.escapeJavaScript($input.json('$')).replaceAll(\"\\\\'\", \"'\") )\n{\"input\": \"$body\", \"name\": \"$context.requestId\", \"stateMachineArn\":\"${StateMachineArn}\"}",
-                {
-                  "StateMachineArn": {
-                    "Ref": "MyStateMachine"
-                  }
-                }
-              ]
-            },
-            "application/x-www-form-urlencoded": {
-              "Fn::Sub": [
-                "\n#set( $body = $util.escapeJavaScript($input.json('$')).replaceAll(\"\\\\'\", \"'\") )\n{\"input\": \"$body\", \"name\": \"$context.requestId\", \"stateMachineArn\":\"${StateMachineArn}\"}",
-                {
-                  "StateMachineArn": {
-                    "Ref": "MyStateMachine"
-                  }
-                }
-              ]
-            }
-          },
-          "IntegrationResponses": [
-            {
-              "StatusCode": 200,
-              "SelectionPattern": 200,
-              "ResponseParameters": {},
-              "ResponseTemplates": {}
-            },
-            {
-              "StatusCode": 400,
-              "SelectionPattern": 400,
-              "ResponseParameters": {},
-              "ResponseTemplates": {}
-            }
-          ]
-        },
-        "MethodResponses": [
-          {
-            "ResponseParameters": {},
-            "ResponseModels": {},
-            "StatusCode": 200
-          },
-          {
-            "ResponseParameters": {},
-            "ResponseModels": {},
-            "StatusCode": 400
-          }
-        ]
-      }
-    },
-    "ApigatewayToStepFunctionsRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com"
-              },
-              "Action": "sts:AssumeRole"
-            }
-          ]
-        },
-        "Policies": [
-          {
-            "PolicyName": "apigatewaytostepfunctions",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "states:StartExecution"
-                  ],
-                  "Resource": "*"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "ApiGatewayDeployment1763434522854": {
-      "Type": "AWS::ApiGateway::Deployment",
-      "Properties": {
-        "RestApiId": {
-          "Ref": "ApiGatewayRestApi"
-        },
-        "StageName": "dev"
-      },
-      "DependsOn": [
-        "ApiGatewayMethodGofunctionGet"
+        "DummyWorkflowStepFunctionsStateMachineRole"
       ]
     }
   },
@@ -787,84 +210,22 @@
         "Name": "sls-myDummyProject-dev-ServerlessDeploymentBucketName"
       }
     },
-    "MyTestFunctionLambdaFunctionQualifiedArn": {
+    "DummyFunctionLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "MyTestFunctionLambdaVersionwhf0isdNfUr0yAGfiRJ0SbPVJm6zBRSBm3qZRQ2KlZQ"
+        "Ref": "DummyFunctionLambdaVersionFrp1kMX3Pz5T1SHFhjrZwxlRTtFvFlrl6XgpI41ogXI"
       },
       "Export": {
-        "Name": "sls-myDummyProject-dev-MyTestFunctionLambdaFunctionQualifiedArn"
+        "Name": "sls-myDummyProject-dev-DummyFunctionLambdaFunctionQualifiedArn"
       }
     },
-    "MyStateMachineArn": {
+    "DummyWorkflowStepFunctionsStateMachineArn": {
       "Description": "Current StateMachine Arn",
       "Value": {
-        "Ref": "MyStateMachine"
+        "Ref": "DummyWorkflowStepFunctionsStateMachine"
       },
       "Export": {
-        "Name": "sls-myDummyProject-dev-MyStateMachineArn"
-      }
-    },
-    "Hellostepfunc2StepFunctionsStateMachineArn": {
-      "Description": "Current StateMachine Arn",
-      "Value": {
-        "Ref": "Hellostepfunc2StepFunctionsStateMachine"
-      },
-      "Export": {
-        "Name": "sls-myDummyProject-dev-Hellostepfunc2StepFunctionsStateMachineArn"
-      }
-    },
-    "DdbtablestepfuncStepFunctionsStateMachineArn": {
-      "Description": "Current StateMachine Arn",
-      "Value": {
-        "Ref": "DdbtablestepfuncStepFunctionsStateMachine"
-      },
-      "Export": {
-        "Name": "sls-myDummyProject-dev-DdbtablestepfuncStepFunctionsStateMachineArn"
-      }
-    },
-    "MyTaskStepFunctionsActivityArn": {
-      "Description": "Current StateMachine Arn",
-      "Value": {
-        "Ref": "MyTaskStepFunctionsActivity"
-      },
-      "Export": {
-        "Name": "sls-myDummyProject-dev-MyTaskStepFunctionsActivityArn"
-      }
-    },
-    "YourTaskStepFunctionsActivityArn": {
-      "Description": "Current StateMachine Arn",
-      "Value": {
-        "Ref": "YourTaskStepFunctionsActivity"
-      },
-      "Export": {
-        "Name": "sls-myDummyProject-dev-YourTaskStepFunctionsActivityArn"
-      }
-    },
-    "ServiceEndpoint": {
-      "Description": "URL of the service endpoint",
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            "https://",
-            {
-              "Ref": "ApiGatewayRestApi"
-            },
-            ".execute-api.",
-            {
-              "Ref": "AWS::Region"
-            },
-            ".",
-            {
-              "Ref": "AWS::URLSuffix"
-            },
-            "/dev"
-          ]
-        ]
-      },
-      "Export": {
-        "Name": "sls-myDummyProject-dev-ServiceEndpoint"
+        "Name": "sls-myDummyProject-dev-DummyWorkflowStepFunctionsStateMachineArn"
       }
     }
   }
